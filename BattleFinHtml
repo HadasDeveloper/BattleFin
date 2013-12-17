@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>{{ board.name }}</title>
+
+<link rel='stylesheet' href="{{ site_url('assets/v3/css/bootstrap.min.css') }}" />
+
+<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700' rel='stylesheet' type='text/css'>
+
+<link rel='stylesheet' href="{{ site_url('assets/skins/battlefin/css/battlefin.css') }}" />
+
+<!--[if lt IE 9]>
+ <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+ <script src="//css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+<![endif]-->
+
+{% if constant('ENVIRONMENT') != 'local' %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+{% else %}
+<script src="{{ site_url('assets/js/jquery-1.7.1.min.js') }}"></script>
+{% endif %}
+<script src="{{ site_url('assets/v2/js/bootstrap.min.js') }}"></script>
+
+<script type="text/javascript" src="{{ site_url('assets/js/jquery-fluid16.js') }}"></script>
+<script type="text/javascript" src="{{ site_url('assets/js/jquery.busy.js') }}"></script>
+<script type="text/javascript" src="{{ site_url('assets/tiny_mce/jquery.tinymce.js') }}"></script>
+
+{% if custom.css %}
+<style type="text/css">{{ custom.css }}</style>
+{% endif %}
+</head>
+
+<body>
+
+<div class="container">
+<div class="row-fluid">
+<div class="span4" id="header-logo">
+<a href="http://www.battlefin.com/"><img src="{{ site_url('assets/skins/battlefin/img/battlefin-logo.png') }}" alt="Battlefin Logo"></a>
+</div>
+<ul class="span8" id="main_nav">
+<li>
+{% if is_logged_in %}
+<a href="{{ site_url('player/signout') }}"><span>&lt; </span>Sign out<span> &gt;</span></a>
+
+{% else %}
+<a href="{{ site_url('player/signin/' ~ board.board_id) }}"><span>&lt; </span>Sign in<span> &gt;</span></a>
+{% endif %}
+
+</li>
+{% if is_logged_in %}
+<li class="">
+<a href="{{ player.profile }}"><span>&lt; </span>Player Profile<span> &gt;</span></a>
+</li>
+{% endif %}
+{% if is_owner %}
+<li>
+<a href="{{ board.manage_link }}"><span> &lt;</span>Edit<span> &gt;</span></a>
+</li>
+{% endif %}
+<li><a href="" class="info-section" id="activity-section"><span>&lt; </span>Twitter Activity<span> &gt;</span></a></li>
+<li><a href="" class="info-section" id="scoring-section"><span>&lt; </span>Scoring<span> &gt;</span></a></li>
+<li><a href="" class="info-section" id="rules-section"><span>&lt; </span>Disclaimer<span> &gt;</span></a></li>
+
+<li><a href="" class="info-section" id="about-section"><span>&lt; </span>About<span> &gt;</span></a></li>
+</ul>
+</div>
+<div class="row-fluid">
+<div class="span8 leaderboard">
+<div class="row-fluid header_bar">
+<span class="span2 sect_head_l">{{ board.name }}</span>
+<span class="span10 sect_head_r">
+<span class="score-heading">Score</span>
+<div class="scores-heading-holder hidden-phone">
+{% for column in board.columns %}
+{% if loop.index > 2 and loop.index < 5 %}
+<span class="scores-heading sh_{{loop.index}}">{{ column.name }}</span>
+{% endif %}
+{% if loop.index > 4 and loop.index < 7 %}
+<span class="pcent scores-heading sh_{{loop.index}}">{{ column.name }}</span>
+{% endif %}
+{% endfor %}
+</div>
+<span class="twitter-heading visible-desktop">Twitter Activity</span>
+</span>
+</div>
+{% for player in players %}
+<div class="row-fluid board_rows">
+<h1 class="pull-left board_rows_rank">{{ player.rank.current }}.</h1>
+{% if player.image %}
+<img class="pull-left" src="{{ player.image }}" style="height: 61px;" />
+{% else %}
+<img class="pull-left" src="{{ site_url('assets/skins/battlefin/img/imageless-player.png') }}" style="height: 61px;" />
+{% endif %}
+<div class="board_rows_plyr pull-left">
+<img src='{{ site_url('assets/skins/battlefin/img/' ~ player.rank.change ~ '.png') }}'/>
+<span>({{ player.rank.previous|title }})</span>
+<h4>{{ player.name }}</h4>
+<a href="{{ player.board_note }}">Strategy Info</a>
+</div>
+<div class="board_rows_score pull-left">
+<h1 class="player-score"><span>{{ number_format(player.score, 0) }}</span></h1>
+{% for score in player.scores if loop.index < 3 %}
+<div>
+<span>{{ score.name }}: </span>
+{{ score.score | number_format(1) }}%
+</div>
+{% endfor %}
+</div>
+<div class="board_rows_scores pull-left hidden-phone">
+<div>
+{% for score in player.scores %}
+{% if loop.index > 2 and loop.index < 5 %}
+<span>{{ number_format(score.score, 0) }}</span>
+{% endif %}
+{% if loop.index > 4 and loop.index < 7 %}
+<span class='pcent'>{{ number_format(score.score, 1) }}%</span>
+{% endif %}
+{% endfor %}
+</div>
+{% if board.board_id == 3288 %}
+<div class="dynamic-spark-line hidden-phone" lb-board="{{ board.board_id }}" lb-source="6358" lb-player="{{ player.player_id }}" lb-column="klout_score" lb-period="60" id="{{ board.board_id }}_{{ player.player_id }}">Loading..</div>
+{% endif %}
+{% if board.board_id == 1320 %}
+<div class="dynamic-spark-line hidden-phone" lb-board="{{ board.board_id }}" lb-source="2173" lb-player="{{ player.player_id }}" lb-column="cum." lb-period="60" id="{{ board.board_id }}_{{ player.player_id }}">Loading..</div>
+{% endif %}
+{% if board.board_id == 1321 %}
+<div class="dynamic-spark-line hidden-phone" lb-board="{{ board.board_id }}" lb-source="2172" lb-player="{{ player.player_id }}" lb-column="cum." lb-period="60" id="{{ board.board_id }}_{{ player.player_id }}">Loading..</div>
+{% endif %}
+</div>
+<div class="board_rows_twitter pull-left visible-desktop">
+{% for score in player.scores %}
+{% if loop.index > 6 %}
+<div>
+<img src="{{ site_url('assets/v3/img/twitter-icons/bird_blue_32.png') }}" />
+<span class="">{{ score.name }}</span>
+<span class="pull-right">{{ number_format(score.score, 0) }}</span>
+</div>
+{% endif %}
+{% endfor %}
+</div>
+</div>
+{% endfor %}
+{% if board.next_release %}
+<div class="row-fluid">
+<p class="pull-right">Next update on: {{ board.next_release }}</p>
+</div>
+{% endif %}
+</div>
+<div class="span4">
+<div class="btn-group pull-right">
+<button class="btn btn-inverse dropdown-toggle dd-releases" data-toggle="dropdown">
+Showing Release: {{ releases.current.name }}
+<span class="caret"></span>
+</button>
+<ul class="dropdown-menu">
+{% for archive in releases.archive %}
+<li>
+<a href="{{ archive.link }}">{% if loop.first %}Current: {% endif %} {{ archive.name }}</a>
+</li>
+{% endfor %}
+</ul>
+</div>
+<div class="customer_chillboard"></div>
+<div class="row-fluid header_bar activity_section">
+<span class="sect_head_l pull-left twitter_activity_head">Twitter Activity</span>
+<span class="sect_head_r pull-right twitter_activity_line">&nbsp;</span>
+<a class="twitter-timeline" href="https://twitter.com/search?q=%23battlefinmiami" data-widget-id="411479788725862400" data-chrome="transparent">Tweets about "#battlefinmiami"</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+
+
+
+</div>
+</div>
+</div>
+<div class="row-fluid logo-footer">
+<div class="sponsored-logos pull-left">
+<h5>Thanks to our Sponsors</h5><br/>
+<a href="http://www.linkedin.com/pub/donald-motschwiller/36/528/ab3"><img src="{{ site_url('customer/data/client/battlefin/sponsor1.png') }}"></a>
+<a href="http://www.kpmg.com"><img src="{{ site_url('customer/data/client/battlefin/sponsor2.png') }}"></a>
+<a href="http://www.rokk3rlabs.com"><img src="{{ site_url('customer/data/client/battlefin/sponsor3.png') }}"></a>
+<a href="http://www.sidarglobal.com "><img src="{{ site_url('customer/data/client/battlefin/sponsor4.png') }}"></a>
+<a href="http://www.deltixlab.com"><img src="{{ site_url('customer/data/client/battlefin/sponsor5.png') }}"></a>
+<a href="http://www.loprestilawgroup.com"><img src="{{ site_url('customer/data/client/battlefin/sponsor6.png') }}"></a>
+<a href="http://www.ravenpack.com"><img src="{{ site_url('customer/data/client/battlefin/sponsor7.png') }}"></a>
+<a href="http://www.ticksmith.com"><img src="{{ site_url('customer/data/client/battlefin/sponsor8.png') }}"></a>
+
+</div>
+
+<div class="powered-by-logos pull-right" style="margin-top:25px">
+<a href="{{ site_url() }}"><img src="{{ site_url('assets/images/leaderboarded_powered_by_500_82_white_text.png') }}" alt="Leaderboarded Logo"></a>
+
+</div>
+</div>
+</div>
+
+<script id="about-section-content" type="text/template">
+<div id="about-section-content-el" class="section-content-el row-fluid header_bar activity_section">
+<span class="sect_head_l pull-left" style="width: 13%">About</span>
+<span class="sect_head_r pull-right" style="width: 87%; margin-top: -3px;">&nbsp;</span>
+<div class='box_content'>
+{{ board.description }}
+</div>
+</div>
+</script>
+
+<script id="scoring-section-content" type="text/template">
+<div id="scoring-section-content-el" class="section-content-el row-fluid header_bar activity_section">
+<span class="sect_head_l pull-left" style="width: 16%">Scoring</span>
+<span class="sect_head_r pull-right" style="width: 84%; margin-top: -3px;">&nbsp;</span>
+<div  class='box_content'>
+{{ board.box_scoring }}
+
+</div>
+</div>
+</script>
+
+<script id="rules-section-content" type="text/template">
+<div id="rules-section-content-el" class="section-content-el row-fluid header_bar activity_section">
+<span class="sect_head_l pull-left" style="width: 16%">Disclaimer</span>
+<span class="sect_head_r pull-right" style="width: 84%; margin-top: -3px;">&nbsp;</span>
+<div  class='box_content'>
+{{ board.box_rules }}
+</div>
+</div>
+</script>
+
+<script type="text/javascript">
+var siteURL = '{{ site_url() }}';
+$(document).ready(function() {
+$('.info-section').click(function(ev) {
+ev.preventDefault();
+var section = $(this).attr('id'),
+content = $('#' + section + '-content').html();
+$('.section-content-el').remove();
+if (content != null) {
+$('.activity_section').hide();
+$('.customer_chillboard').after(content);
+} else {
+$('.activity_section').show();
+};
+});
+
+showDefaultSection();
+});
+
+function showDefaultSection() {
+
+};
+</script>
+
+{% if constant('ENVIRONMENT') == 'production' %}
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-30099995-1']);
+_gaq.push(['_trackPageview']);
+(function() {
+var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+</script>
+{% endif %}
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.1/jquery.sparkline.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+$('.dynamic-spark-line').each(function() {
+var elID = $(this).attr('id');
+var lbBoard = $(this).attr('lb-board');
+var lbSource = $(this).attr('lb-source');
+var lbPlayer = $(this).attr('lb-player');
+var lbColumn = $(this).attr('lb-column');
+var lbPeriod = $(this).attr('lb-period');
+createDynamicSparkLine(elID, lbBoard, lbSource, lbPlayer, lbColumn, lbPeriod);
+});
+});
+function createDynamicSparkLine(elID, boardID, sourceID, playerID, columName, days) {
+$.ajax({
+url: siteURL + '/sources/data_for_last_days/' + boardID + '/' + sourceID + '/' + playerID + '/' + columName + '/' + days,
+dataType: 'json',
+success: function(data, textStatus, jqXHR) {
+// Flatten the Object
+var sparklineData = $.map(data, function(el) {
+return el;
+});
+// Create the Sparkline
+$('#' + elID).sparkline(sparklineData, {
+type: 'line',
+    lineColor: '#0e9fce',
+    fillColor: '#0B223E',
+    highlightSpotColor: '#071734',
+    highlightLineColor: '#071734',
+    lineWidth: 1.5,
+    spotColor: false,
+    minSpotColor: false,
+    maxSpotColor: false,
+    width: '107px'
+});
+},
+error: function(jqXHR, textStatus, errorThrown) {}
+});
+};
+</script>
+
+{% if custom.js %}
+<script type="text/javascript">
+$(document).ready(function() {
+{{ custom.js }}
+});
+</script>
+{% endif %}
+ </body>
+</html>
